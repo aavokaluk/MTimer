@@ -2513,7 +2513,7 @@ class MTimer(QWidget):
             }
 
             QMenu::item {
-                padding: 7px 24px 7px 12px;
+                padding: 2px 24px 2px 12px;
                 border-radius: 4px;
             }
 
