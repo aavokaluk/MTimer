@@ -37,5 +37,5 @@ See the repository for license information.
 
 If you find MTimer useful, you can support its development.
 
-[❤️ Support the developer](https://www.patreon.com/)
+[❤️ Support the developer](https://www.patreon.com/cw/Vokaluk)
 
