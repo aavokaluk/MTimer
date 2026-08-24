@@ -16,6 +16,7 @@ from PySide6.QtGui import (
     QPainter,
     QIcon,
     QFontMetrics,
+    QDesktopServices,
 )
 from PySide6.QtMultimedia import QSoundEffect
 from PySide6.QtWidgets import (
@@ -1249,6 +1250,61 @@ class SettingsDialog(QDialog):
 
         layout.addWidget(
             self.autostart_checkbox
+        )
+
+                # ====================================================
+        # Patreon
+        # ====================================================
+
+        line = QFrame()
+
+        line.setFrameShape(
+            QFrame.HLine
+        )
+
+        line.setStyleSheet("""
+            QFrame {
+                color: #343B42;
+            }
+        """)
+
+        layout.addWidget(
+            line
+        )
+
+        patreon_label = QLabel(
+            '<a href="https://www.patreon.com/cw/Vokaluk">'
+            'Support MTimer on Patreon'
+            '</a>'
+        )
+
+        patreon_label.setOpenExternalLinks(
+            True
+        )
+
+        patreon_label.setAlignment(
+            Qt.AlignCenter
+        )
+
+        patreon_label.setStyleSheet("""
+            QLabel {
+                color: #9AA3AC;
+                font-size: 12px;
+            }
+
+            QLabel a {
+                color: #FF6B35;
+                text-decoration: none;
+            }
+
+            QLabel a:hover {
+                color: #FF8A22;
+                text-decoration: underline;
+            }
+        """)
+
+        layout.addWidget(
+            patreon_label
         )
 
         buttons = QDialogButtonBox(
