@@ -1,5 +1,9 @@
 # MTimer
 
+<p align="center">
+  <img src="assets/Hero.png" alt="MTimer" width="500">
+</p>
+
 A tiny, lightweight timer widget for Windows.
 
 MTimer stays visible above other windows and gives you a simple way
@@ -23,9 +27,6 @@ Download the latest version of MTimer for Windows:
 
 https://mtimer-site.pages.dev/
 
-## Screenshots
-
-Screenshots coming soon.
 
 ## License
 
