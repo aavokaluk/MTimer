@@ -30,3 +30,11 @@ Screenshots coming soon.
 ## License
 
 See the repository for license information.
+
+
+## Support MTimer
+
+If you find MTimer useful, you can support its development.
+<!--
+[❤️ Support the developer](https://www.patreon.com/)
+-->
