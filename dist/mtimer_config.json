@@ -1,10 +1,10 @@
 {
-    "minutes": 29,
+    "minutes": 1,
     "button_sound": true,
     "timer_sound": true,
     "timer_sound_loop": false,
     "autostart": false,
     "note_opacity": 95,
-    "window_x": 885,
-    "window_y": 496
+    "window_x": 299,
+    "window_y": 990
 }
