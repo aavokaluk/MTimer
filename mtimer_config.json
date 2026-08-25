@@ -1,12 +1,12 @@
 {
-    "minutes": 2223,
+    "minutes": 2227,
     "button_sound": true,
     "timer_sound": true,
     "timer_sound_loop": false,
     "autostart": false,
     "note_opacity": 63,
-    "window_x": 303,
-    "window_y": 936,
+    "window_x": 334,
+    "window_y": 802,
     "note_background_opacity": 51,
     "note_text_opacity": 96,
     "note": "выыв вуывыва \nыцуцуц уц уц уцуц уцуцуцу "

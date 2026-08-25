@@ -656,6 +656,12 @@ class MTimer(QWidget):
         self.position_timer.setInterval(50)
         self.position_timer.timeout.connect(self.update_note_position)
 
+        # Отложенное сохранение настроек без фризов UI
+        self.save_config_timer = QTimer(self)
+        self.save_config_timer.setSingleShot(True)
+        self.save_config_timer.setInterval(500)
+        self.save_config_timer.timeout.connect(lambda: save_config(self.config))
+
         self.click_sound = QSoundEffect(self)
         self.click_sound.setVolume(0.35)
         if CLICK_SOUND.exists():
@@ -721,7 +727,7 @@ class MTimer(QWidget):
         """)
         self.note_button.clicked.connect(self.toggle_note)
 
-        # Quick Adjust Buttons: '-' и '+' (Нижний ярус строго под цифрами)
+        # Quick Adjust Buttons: '-' и '+' (Нижний ярус)
         quick_btn_style = """
             QPushButton {
                 background: #1C2128;
@@ -827,22 +833,37 @@ class MTimer(QWidget):
         self.add_button.setEnabled(enabled)
 
     def adjust_time(self, default_step_min: int, fast_step_min: int):
-        if self.editing or self.running or self.paused:
+        if self.editing or self.running:
             return
 
         self.play_click()
+
         modifiers = QApplication.keyboardModifiers()
         if modifiers & (Qt.ShiftModifier | Qt.ControlModifier):
             step = fast_step_min
         else:
             step = default_step_min
 
+        # Если таймер завершился или был на паузе — возвращаемся в режим готовности
+        if self.finished or self.paused:
+            self.stop_done_sound()
+            self.finished = False
+            self.paused = False
+            self.action_button.setPauseMode(False)
+            self.action_button.setText("▶")
+            self.stop_button.hide()
+            self.close_button.setEnabled(True)
+
         new_minutes = max(1, self.minutes + step)
         self.minutes = new_minutes
         self.remaining_seconds = self.minutes * 60
         self.config["minutes"] = self.minutes
-        save_config(self.config)
+
         self.update_time_display()
+        self.update_layout()
+
+        # Сохранение с debounce, без фризов
+        self.save_config_timer.start()
 
     # ========================================================
     # Note
@@ -875,30 +896,27 @@ class MTimer(QWidget):
         self.note_window.update_position()
 
     # ========================================================
-    # Sounds
+    # Sounds (Исправлены зависания WASAPI)
     # ========================================================
 
     def play_click(self):
         if not self.button_sound_enabled or not CLICK_SOUND.exists():
             return
-        self.click_sound.stop()
         self.click_sound.play()
 
     def play_done_sound(self):
         if not self.timer_sound_enabled or not DONE_SOUND.exists():
             return
         self.stop_done_sound()
-        if not self.timer_sound_loop:
-            self.done_sound.play()
-            return
-        self.done_sound_loop_active = True
         self.done_sound.play()
-        self.schedule_done_sound_loop()
+        if self.timer_sound_loop:
+            self.done_sound_loop_active = True
+            self.schedule_done_sound_loop()
 
     def schedule_done_sound_loop(self):
         if not self.done_sound_loop_active:
             return
-        self.done_sound_loop_timer.start(100)
+        self.done_sound_loop_timer.start(500)
 
     def restart_done_sound(self):
         if not self.done_sound_loop_active or not self.timer_sound_enabled or not self.timer_sound_loop:
@@ -911,7 +929,8 @@ class MTimer(QWidget):
     def stop_done_sound(self):
         self.done_sound_loop_active = False
         self.done_sound_loop_timer.stop()
-        self.done_sound.stop()
+        if self.done_sound.isPlaying():
+            self.done_sound.stop()
 
     # ========================================================
     # Layout
@@ -925,19 +944,18 @@ class MTimer(QWidget):
         self.note_button.move(6, center_y - self.note_button.height() // 2)
         self.action_button.move(width - 46, center_y - self.action_button.height() // 2)
         self.stop_button.move(width - 30, center_y - self.stop_button.height() // 2)
-        self.close_button.move(width - 22, 0)
+        self.close_button.move(width - 23, 0)
 
-        # Смещение центрального блока влево
         CENTER_OFFSET = 10
 
         # 2. Цифры таймера (верхний ярус)
         self.time_label.adjustSize()
         label_x = (width - self.time_label.width()) // 2 - CENTER_OFFSET
-        self.time_label.move(label_x, 8)
+        self.time_label.move(label_x, 7)
         self.time_edit.move((width - self.time_edit.width()) // 2 - CENTER_OFFSET, 5)
 
-        # 3. Кнопки '-' и '+' (нижний ярус, строго под цифрами)
-        btn_y = 27
+        # 3. Кнопки '-' и '+' (нижний ярус)
+        btn_y = 28
         spacing = 6
         total_btns_width = self.sub_button.width() + spacing + self.add_button.width()
         start_x = (width - total_btns_width) // 2 - CENTER_OFFSET
@@ -989,7 +1007,8 @@ class MTimer(QWidget):
         self.paused = True
         self.timer.stop()
 
-        self.set_adjust_buttons_enabled(False)
+        # Разрешаем корректировку времени при остановке
+        self.set_adjust_buttons_enabled(True)
 
         self.action_button.setPauseMode(False)
         self.action_button.setText("▶")
@@ -1344,7 +1363,7 @@ class MTimer(QWidget):
 
 
 # ============================================================
-# Single Instance Check (Защита от повторного запуска)
+# Single Instance Check
 # ============================================================
 
 MUTEX_NAME = "MTimer_App_Instance_Mutex_Unique"
